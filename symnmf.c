@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 //parsing the points from the file------------------------------------------------------------------
 
@@ -176,4 +177,28 @@ double** caluclate_Laplacian(double** D, double** A, int n){
     double** DA = matrix_mult(D, A, n , n, n);
     double** W = matrix_mult(DA, D, n, n, n);
     return W;
+}
+
+
+
+
+
+
+//Main------------------------------------------------------------------
+
+
+
+
+
+int main(int argc, char *argv[]) {
+    if (argc != 3){
+        printf("An Error Has Occurred\n");
+        return 1;
+    }
+
+    
+
+
+
+
 }
