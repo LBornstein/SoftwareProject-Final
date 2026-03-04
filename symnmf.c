@@ -137,7 +137,9 @@ double** calculate_diagonal_degree_matrix(double** p, int n) {
             row_sum += p[i][j];
         }
         
-        result[i][i] = row_sum;
+        double entry = pow(row_sum, -0.5);
+
+        result[i][i] = entry;
     }
     
     return result;
@@ -151,6 +153,7 @@ double calculate_distance(double* p, double* q, int d) {
     }
     return sqrt(sum);
 }
+
 
 
 
