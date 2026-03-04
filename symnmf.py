@@ -14,7 +14,7 @@ def main():
     file_name = sys.argv[3]
 
     points_list = parse_points()
-    
+
     n = len(points_list)
     d = len(points_list[0])
 
@@ -69,7 +69,7 @@ def output_mat(m):
     s = ""
     for i in range(len(m)):
         for j in range(len(m[i])):
-            s = s + "," + m[i][j]
+            s = s + "," + str(m[i][j])
         s = s[:-1] + "\n"
     s = s[:-1]
     print(s)
