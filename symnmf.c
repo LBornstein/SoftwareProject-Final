@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#define BETA 0.5
 
 //helper functions------------------------------------------------------------------
 
@@ -95,6 +96,44 @@ void print_matrix(double **matrix, int rows, int cols) {
     }
 }
 
+double **mat_transpose(double **mat, int rows, int cols){
+    double **ret_mat = allocate_matrix(cols, rows);
+    int i, j;
+
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
+            ret_mat[j][i] = mat[i][j];
+        }
+    }
+    return ret_mat;
+}
+
+
+double **update_H(double **H, double **W, int n, int k){
+    double **ret_mat, **WH, **transH, **HTH, **HHTH;
+    int i, j;
+    ret_mat = allocate_matrix(n,k);
+    WH = matrix_mult(W,H,n,n,k);
+    transH = mat_transpose(H,n,k);
+    HTH = matrix_mult(transH,H,k,n,k); 
+    HHTH = matrix_mult(H,HTH,n,k,k);
+
+    free_matrix(transH);
+    free_matrix(HTH);
+
+    for(i = 0; i < n ; i++){
+        for (j = 0 ; j < k ; j++){
+            ret_mat[i][j] = H[i][j]*(1-BETA + BETA*(WH[i][j]/HHTH[i][j]));
+        }
+    }
+
+    free_matrix(WH);
+    free_matrix(HHTH);
+
+    return ret_mat;
+}
+
+
 //parse points from input file------------------------------------------------------------------
 
 double **parse_points(char *file_name, int num_of_points, int dim){
@@ -129,6 +168,14 @@ double **parse_points(char *file_name, int num_of_points, int dim){
 }
 
 //calculation part------------------------------------------------------------------
+double calculate_distance(double* p, double* q, int d) {
+    double sum = 0.0;
+    int i;
+    for (i = 0; i < d; i++) {
+        sum += (p[i] - q[i]) * (p[i] - q[i]);
+    }
+    return sqrt(sum);
+}
 
 double** calculate_similarity_matrix(double** p, int n, int d){
     double** result = allocate_matrix(n,n);
@@ -136,7 +183,7 @@ double** calculate_similarity_matrix(double** p, int n, int d){
     double dist, power;
 
     for (i = 0; i < n; i++) {
-        for (j=0; j < n; j++){
+        for (j = 0; j < n; j++){
             if (i != j){
                 dist = calculate_distance(p[i], p[j], d);
                 power = -(dist * dist) / 2.0;
@@ -149,11 +196,12 @@ double** calculate_similarity_matrix(double** p, int n, int d){
 
 
 double** calculate_diagonal_degree_matrix(double** p, int n) {
-    double** result = allocate_matrix(n,n);
+    int i,j;
+    double row_sum,**result = allocate_matrix(n,n);
     
-    for (int i = 0; i < n; i++) {
-        double row_sum = 0.0;
-        for (int j = 0; j < n; j++) {
+    for (i = 0; i < n; i++) {
+        row_sum = 0.0;
+        for (j = 0; j < n; j++) {
             row_sum += p[i][j];
         }
 
@@ -163,14 +211,6 @@ double** calculate_diagonal_degree_matrix(double** p, int n) {
     return result;
 }
 
-double calculate_distance(double* p, double* q, int d) {
-    double sum = 0.0;
-    int i;
-    for (i = 0; i < d; i++) {
-        sum += (p[i] - q[i]) * (p[i] - q[i]);
-    }
-    return sqrt(sum);
-}
 
 
 double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inner_dim, int cols_right){
@@ -189,27 +229,69 @@ double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inn
     return ret_mat;
 }
 
+double **matrix_subtract(double **LeftMat, double **RightMat, int rows, int cols){
+    /*Matrix subtraction function*/
+    int i, j;
+    double **ret_mat = allocate_matrix(rows, cols);
+
+    for (i = 0; i < rows; i++){
+        for (j = 0; j < cols; j++){
+            ret_mat[i][j] = LeftMat[i][j] - RightMat[i][j];
+        }
+    }
+
+    return ret_mat;
+}
+
 void calculate_D_pow(double** D, int n){
-    for(int i=0; i < n; i++){
+    int i;
+    for( i = 0; i < n; i++){
         D[i][i] = pow(D[i][i], -0.5);
     }
 }
 
 double** calculate_Laplacian(double** D, double** A, int n){
+    double **DA, **W;
     calculate_D_pow(D, n);
-    double** DA = matrix_mult(D, A, n , n, n);
-    double** W = matrix_mult(DA, D, n, n, n);
+    DA = matrix_mult(D, A, n , n, n);
+    W = matrix_mult(DA, D, n, n, n);
     free_matrix(DA);
     return W;
 }
 
+double calculate_Frobenius_norm(double **matrix, int rows, int cols){
+    int i,j;
+    double retval = 0;
 
+    for(i = 0; i < rows ; i++){
+        for(j = 0; j < cols ; j++){
+            retval += pow(matrix[i][j], 2);
+        }
+    }
+
+    return sqrt(retval);
+}
 
 
 
 //functions for the C API wrapper------------------------------------------------------------------
-double** symnmf(double** H, double** W, int n){
-    // need to add this and the function for the H part
+double** symnmf(double** H, double** W, int n , int k, double eps, int max_iter){
+    double **new_H, **temp;
+    int i,convergence;
+    i = 0;
+    convergence = 0;
+
+    for(i = 0 ; i < max_iter ; i++){
+        new_H = update_H(H,W,n,k);
+        temp = matrix_subtract(new_H,H,n,k);
+        if(pow(calculate_Frobenius_norm(temp,n,k),2) < eps) convergence = 1;
+        free_matrix(temp);
+        free_matrix(H);
+        H = new_H;
+        if(convergence) break;
+    }
+    
+    return H;
 }
 
 double** sym(double** data_points, int n, int d){
@@ -235,7 +317,7 @@ double** norm(double** data_points, int n, int d){
 //Main------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-    int dim, num_of_points, *mat_shape, **points_mat;
+    int dim, num_of_points, *mat_shape, **points_mat, **output_mat;
     if (argc != 3){
         printf("An Error Has Occurred\n");
         return 1;
@@ -250,24 +332,24 @@ int main(int argc, char *argv[]) {
     points_mat = parse_points(argv[2],num_of_points,dim);
 
     if (strcmp(argv[1],"sym") == 0) {
-        print_matrix(sym(points_mat,num_of_points,dim),num_of_points,num_of_points);
+        output_mat = sym(points_mat,num_of_points,dim);
     }
 
     else if (strcmp(argv[1],"ddg") == 0) {
-        print_matrix(ddg(points_mat,num_of_points,dim),num_of_points,num_of_points);
+       output_mat = ddg(points_mat,num_of_points,dim);
     }
 
     else if (strcmp(argv[1],"norm") == 0) {
-        print_matrix(norm(points_mat,num_of_points,dim),num_of_points,num_of_points);
+        output_mat = norm(points_mat,num_of_points,dim);
     }
     else {
         printf("An Error Has Occurred\n");
         return 1;
     }
 
-
-
-
-
+    print_matrix(output_mat,num_of_points,num_of_points);
+    free_matrix(output_mat);
+    free_matrix(points_mat);
+    return 0;
 }
 
