@@ -63,16 +63,13 @@ def parse_points(file_name):
             temp[i]=float(temp[i])
         points_arr.append(temp)
         s = file.readline()
+    file.close()
     return points_arr
 
 def output_mat(m):
-    s = ""
-    for i in range(len(m)):
-        for j in range(len(m[i])):
-            s = s + "," + str(m[i][j])
-        s = s[:-1] + "\n"
-    s = s[:-1]
-    print(s)
+    for row in m:
+        # Formats every float to 4 decimal places, joins them with commas
+        print(",".join([f"{val:.4f}" for val in row]))
 
 
 

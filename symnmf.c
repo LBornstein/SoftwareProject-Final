@@ -4,7 +4,7 @@
 #include <string.h>
 #define BETA 0.5
 
-//helper functions------------------------------------------------------------------
+/*helper functions------------------------------------------------------------------*/
 
 int *get_matrix_size(char *file_name){
     /*Reads input file in order to determine the matrix size*/
@@ -134,7 +134,7 @@ double **update_H(double **H, double **W, int n, int k){
 }
 
 
-//parse points from input file------------------------------------------------------------------
+/*parse points from input file------------------------------------------------------------------*/
 
 double **parse_points(char *file_name, int num_of_points, int dim){
     /* Reads the points from the provided .txt file */
@@ -167,7 +167,7 @@ double **parse_points(char *file_name, int num_of_points, int dim){
 
 }
 
-//calculation part------------------------------------------------------------------
+/*calculation part------------------------------------------------------------------*/
 double calculate_distance(double* p, double* q, int d) {
     double sum = 0.0;
     int i;
@@ -274,7 +274,7 @@ double calculate_Frobenius_norm(double **matrix, int rows, int cols){
 
 
 
-//functions for the C API wrapper------------------------------------------------------------------
+/*functions for the C API wrapper------------------------------------------------------------------*/
 double** symnmf(double** H, double** W, int n , int k, double eps, int max_iter){
     double **new_H, **temp;
     int i,convergence;
@@ -314,7 +314,7 @@ double** norm(double** data_points, int n, int d){
     return ret;
 }
 
-//Main------------------------------------------------------------------
+/*Main------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
     int dim, num_of_points, *mat_shape, **points_mat, **output_mat;
