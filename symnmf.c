@@ -175,4 +175,5 @@ double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inn
 double** caluclate_Laplacian(double** D, double** A, int n){
     double** DA = matrix_mult(D, A, n , n, n);
     double** W = matrix_mult(DA, D, n, n, n);
+    return W;
 }
