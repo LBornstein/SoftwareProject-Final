@@ -4,12 +4,11 @@
 
 
 double** caluclate_similarity_matrix(double** p, int n, int d){
-    double** result = (double**)malloc(n * sizeof(double*));
+    double** result = allocate_matrix(n,n);
     int i, j;
     double dist, power;
 
     for (i = 0; i < n; i++) {
-        result[i] = (double*)calloc(n, sizeof(double));
         for (j=0; j < n; j++){
             if (i != j){
                 dist = calculate_distance(p[i], p[j], d);
@@ -18,17 +17,14 @@ double** caluclate_similarity_matrix(double** p, int n, int d){
             }
         }
     }
-
     return result;
 }
 
 
 double** calculate_diagonal_degree_matrix(double** p, int n) {
-    double** result = (double**)malloc(n * sizeof(double*));
+    double** result = allocate_matrix(n,n);
     
     for (int i = 0; i < n; i++) {
-        result[i] = (double*)calloc(n, sizeof(double));
-
         double row_sum = 0.0;
         for (int j = 0; j < n; j++) {
             row_sum += p[i][j];
@@ -123,8 +119,6 @@ void free_matrix(double **matrix) {
 }
 
 
-
-
 double **parse_points(char *file_name, int num_of_points, int dim){
     /* Reads the points from the provided .txt file */
     int i,j;
@@ -156,4 +150,20 @@ double **parse_points(char *file_name, int num_of_points, int dim){
 
 }
 
+
+double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inner_dim, int cols_right){
+    /*Matrix multipication function, we assume dimensions are correct and dont check them*/
+    int i,j,k; 
+    double **ret_mat = allocate_matrix(rows_left,cols_right);
+
+    for (i = 0; i < rows_left ; i++){
+        for (j = 0 ; j < cols_right ; j++){
+            for(k = 0 ; k < inner_dim ; k++){
+                ret_mat[i][j] += LeftMat[i][k]*RightMat[k][j]; 
+            }
+        }
+    }
+
+    return ret_mat;
+}
 
