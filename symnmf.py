@@ -14,6 +14,7 @@ def main():
     file_name = sys.argv[3]
 
     points_list = parse_points()
+    
     n = len(points_list)
     d = len(points_list[0])
 
@@ -52,7 +53,17 @@ def init_H(W, k):
     return H
 
 def parse_points(file_name):
-    pass
+    file = open(file_name, 'r')
+    points_arr = []
+    s = file.readline()
+    while s != "":
+        temp = s.strip()
+        temp = temp.split(",")
+        for i in range(len(temp)):
+            temp[i]=float(temp[i])
+        points_arr.append(temp)
+        s = file.readline()
+    return points_arr
 
 def output_mat(m):
     s = ""
