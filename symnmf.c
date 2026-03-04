@@ -2,49 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-
-double** caluclate_similarity_matrix(double** p, int n, int d){
-    double** result = allocate_matrix(n,n);
-    int i, j;
-    double dist, power;
-
-    for (i = 0; i < n; i++) {
-        for (j=0; j < n; j++){
-            if (i != j){
-                dist = calculate_distance(p[i], p[j], d);
-                power = -(dist * dist) / 2.0;
-                result[i][j] = exp(power);
-            }
-        }
-    }
-    return result;
-}
-
-
-double** calculate_diagonal_degree_matrix(double** p, int n) {
-    double** result = allocate_matrix(n,n);
-    
-    for (int i = 0; i < n; i++) {
-        double row_sum = 0.0;
-        for (int j = 0; j < n; j++) {
-            row_sum += p[i][j];
-        }
-        
-        result[i][i] = row_sum;
-    }
-    
-    return result;
-}
-
-double calculate_distance(double* p, double* q, int d) {
-    double sum = 0.0;
-    int i;
-    for (i = 0; i < d; i++) {
-        sum += (p[i] - q[i]) * (p[i] - q[i]);
-    }
-    return sqrt(sum);
-}
-
+//parsing the points from the file------------------------------------------------------------------
 
 int *get_matrix_size(char *file_name){
     /*Reads input file in order to determine the matrix size*/
@@ -149,6 +107,51 @@ double **parse_points(char *file_name, int num_of_points, int dim){
     return points_arr;
 
 }
+
+//calculation part------------------------------------------------------------------
+
+double** caluclate_similarity_matrix(double** p, int n, int d){
+    double** result = allocate_matrix(n,n);
+    int i, j;
+    double dist, power;
+
+    for (i = 0; i < n; i++) {
+        for (j=0; j < n; j++){
+            if (i != j){
+                dist = calculate_distance(p[i], p[j], d);
+                power = -(dist * dist) / 2.0;
+                result[i][j] = exp(power);
+            }
+        }
+    }
+    return result;
+}
+
+
+double** calculate_diagonal_degree_matrix(double** p, int n) {
+    double** result = allocate_matrix(n,n);
+    
+    for (int i = 0; i < n; i++) {
+        double row_sum = 0.0;
+        for (int j = 0; j < n; j++) {
+            row_sum += p[i][j];
+        }
+        
+        result[i][i] = row_sum;
+    }
+    
+    return result;
+}
+
+double calculate_distance(double* p, double* q, int d) {
+    double sum = 0.0;
+    int i;
+    for (i = 0; i < d; i++) {
+        sum += (p[i] - q[i]) * (p[i] - q[i]);
+    }
+    return sqrt(sum);
+}
+
 
 
 double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inner_dim, int cols_right){
