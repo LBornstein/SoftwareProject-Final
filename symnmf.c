@@ -155,8 +155,6 @@ double calculate_distance(double* p, double* q, int d) {
 }
 
 
-
-
 double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inner_dim, int cols_right){
     /*Matrix multipication function, we assume dimensions are correct and dont check them*/
     int i,j,k; 
@@ -173,3 +171,8 @@ double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inn
     return ret_mat;
 }
 
+
+double** caluclate_Laplacian(double** D, double** A, int n){
+    double** DA = matrix_mult(D, A, n , n, n);
+    double** W = matrix_mult(DA, D, n, n, n);
+}
