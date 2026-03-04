@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//parsing the points from the file------------------------------------------------------------------
+//helper functions------------------------------------------------------------------
 
 int *get_matrix_size(char *file_name){
     /*Reads input file in order to determine the matrix size*/
@@ -77,6 +77,25 @@ void free_matrix(double **matrix) {
     }
 }
 
+void print_matrix(double **matrix, int rows, int cols) {
+    int i, j;
+    
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
+            /* Format to 4 decimal places */
+            printf("%.4f", matrix[i][j]);
+            
+            /* Print comma separator, but not after the last element */
+            if (j < cols - 1) {
+                printf(",");
+            }
+        }
+        /* New line for each row */
+        printf("\n");
+    }
+}
+
+//parse points from input file------------------------------------------------------------------
 
 double **parse_points(char *file_name, int num_of_points, int dim){
     /* Reads the points from the provided .txt file */
@@ -180,6 +199,7 @@ double** calculate_Laplacian(double** D, double** A, int n){
     calculate_D_pow(D, n);
     double** DA = matrix_mult(D, A, n , n, n);
     double** W = matrix_mult(DA, D, n, n, n);
+    free_matrix(DA);
     return W;
 }
 
@@ -197,24 +217,54 @@ double** sym(double** data_points, int n, int d){
 }
 
 double** ddg(double** data_points, int n, int d){
-    double** A = calculate_similarity_matrix(data_points, n, d);
-    return calculate_diagonal_degree_matrix(A, n);
+    double **A = calculate_similarity_matrix(data_points, n, d);
+    double **ret = calculate_diagonal_degree_matrix(A, n);
+    free_matrix(A);
+    return ret;
 }
 
 double** norm(double** data_points, int n, int d){
-    double** A = calculate_similarity_matrix(data_points, n, d);
-    double** D = calculate_diagonal_degree_matrix(A, n);
-    return calculate_Laplacian(D, A, n);
+    double **A = calculate_similarity_matrix(data_points, n, d);
+    double **D = calculate_diagonal_degree_matrix(A, n);
+    double **ret = calculate_Laplacian(D, A, n);
+    free_matrix(A);
+    free_matrix(D);
+    return ret;
 }
 
 //Main------------------------------------------------------------------
+
 int main(int argc, char *argv[]) {
+    int dim, num_of_points, *mat_shape, **points_mat;
     if (argc != 3){
         printf("An Error Has Occurred\n");
         return 1;
     }
 
+    /* get matrix shape for further calculations */
+    mat_shape = get_matrix_size(argv[2]);
+    dim = mat_shape[1];
+    num_of_points = mat_shape[0];
+    free(mat_shape);
     
+    points_mat = parse_points(argv[2],num_of_points,dim);
+
+    if (strcmp(argv[1],"sym") == 0) {
+        print_matrix(sym(points_mat,num_of_points,dim),num_of_points,num_of_points);
+    }
+
+    else if (strcmp(argv[1],"ddg") == 0) {
+        print_matrix(ddg(points_mat,num_of_points,dim),num_of_points,num_of_points);
+    }
+
+    else if (strcmp(argv[1],"norm") == 0) {
+        print_matrix(norm(points_mat,num_of_points,dim),num_of_points,num_of_points);
+    }
+    else {
+        printf("An Error Has Occurred\n");
+        return 1;
+    }
+
 
 
 
