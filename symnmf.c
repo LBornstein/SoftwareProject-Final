@@ -111,7 +111,7 @@ double **parse_points(char *file_name, int num_of_points, int dim){
 
 //calculation part------------------------------------------------------------------
 
-double** caluclate_similarity_matrix(double** p, int n, int d){
+double** calculate_similarity_matrix(double** p, int n, int d){
     double** result = allocate_matrix(n,n);
     int i, j;
     double dist, power;
@@ -137,10 +137,8 @@ double** calculate_diagonal_degree_matrix(double** p, int n) {
         for (int j = 0; j < n; j++) {
             row_sum += p[i][j];
         }
-        
-        double entry = pow(row_sum, -0.5);
 
-        result[i][i] = entry;
+        result[i][i] = row_sum;
     }
     
     return result;
@@ -172,8 +170,14 @@ double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inn
     return ret_mat;
 }
 
+void calculate_D_pow(double** D, int n){
+    for(int i=0; i < n; i++){
+        D[i][i] = pow(D[i][i], -0.5);
+    }
+}
 
-double** caluclate_Laplacian(double** D, double** A, int n){
+double** calculate_Laplacian(double** D, double** A, int n){
+    calculate_D_pow(D, n);
     double** DA = matrix_mult(D, A, n , n, n);
     double** W = matrix_mult(DA, D, n, n, n);
     return W;
@@ -183,13 +187,27 @@ double** caluclate_Laplacian(double** D, double** A, int n){
 
 
 
+//functions for the C API wrapper------------------------------------------------------------------
+double** symnmf(double** H, double** W, int n){
+    // need to add this and the function for the H part
+}
+
+double** sym(double** data_points, int n, int d){
+    return calculate_similarity_matrix(data_points, n, d);
+}
+
+double** ddg(double** data_points, int n, int d){
+    double** A = calculate_similarity_matrix(data_points, n, d);
+    return calculate_diagonal_degree_matrix(A, n);
+}
+
+double** norm(double** data_points, int n, int d){
+    double** A = calculate_similarity_matrix(data_points, n, d);
+    double** D = calculate_diagonal_degree_matrix(A, n);
+    return calculate_Laplacian(D, A, n);
+}
 
 //Main------------------------------------------------------------------
-
-
-
-
-
 int main(int argc, char *argv[]) {
     if (argc != 3){
         printf("An Error Has Occurred\n");
@@ -202,3 +220,4 @@ int main(int argc, char *argv[]) {
 
 
 }
+
