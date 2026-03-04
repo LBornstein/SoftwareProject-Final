@@ -12,8 +12,7 @@ def main():
     k = int(sys.argv[1])
     goal = sys.argv[2]
     file_name = sys.argv[3]
-
-    points_list = parse_points()
+    points_list = parse_points(file_name)
 
     n = len(points_list)
     d = len(points_list[0])
@@ -24,7 +23,7 @@ def main():
     if goal == 'symnmf':
         W = symnmf.norm(points_list, n ,d)
         H = init_H(W, k)
-        M = symnmf.symnmf(H, W, n, k)
+        M = symnmf.symnmf(H, W, n, k, epsilon, max_iter)
     elif goal == 'sym':
         M = symnmf.sym(points_list, n, d)
     elif goal == 'ddg':
