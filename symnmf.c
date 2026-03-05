@@ -332,7 +332,8 @@ double** norm(double** data_points, int n, int d){
 /*Main------------------------------------------------------------------*/
 
 int main(int argc, char *argv[]) {
-    int dim, num_of_points, *mat_shape, **points_mat, **output_mat;
+    int dim, num_of_points, *mat_shape;
+    double **points_mat, **output_mat;
     if (argc != 3){
         printf("An Error Has Occurred\n");
         return 1;
