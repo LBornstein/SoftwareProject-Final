@@ -1,4 +1,5 @@
 import sys
+import symnmfmodule
 import symnmf
 import numpy as np
 from sklearn.metrics import silhouette_score
@@ -51,11 +52,13 @@ def cluster_handle(k , iter , points_arr):
         convergence = True
 
         for i in range(k):
-            updated_centroid = update_centroid(clusters[i])
+            if len(clusters[i]) == 0:
+                updated_centroid = points_arr[0][:]
+            else:
+                updated_centroid = update_centroid(clusters[i])
 
-            for cord in range(len(updated_centroid)):
-                if abs(centroids[i][cord]-updated_centroid[cord]) >= 0.001:
-                    convergence = False
+            if calculate_distance(centroids[i], updated_centroid) >= 1e-4:
+                convergence = False
 
             centroids[i] = updated_centroid
 
@@ -74,20 +77,6 @@ def get_cluster_list_kmeans(clusters, points_list):
 
 #things for the symnmf alogrithem---------------------------------------
 
-def calculate_matrix_avg(M):
-    sum = 0
-    for i in range(len(M)):
-        for j in range(len(M[0])):
-            sum += M[i][j]
-    return sum / (len(M)**2)
-    
-def init_H(W, k):
-    n = len(W)
-    m = calculate_matrix_avg(W)
-    interval = 2 * ((m / k) ** 0.5)
-    H = [[np.random.uniform(0.0, interval) for col in range(k)] for row in range(n)]
-    return H
-
 def get_cluster_list_symnmf(H, points_list):
     clusters_list = [0 for i in range(len(points_list))]
     for i in range (len(H)):
@@ -102,30 +91,6 @@ def get_cluster_list_symnmf(H, points_list):
 
 # general code
 
-def parse_points(file_name):
-    try:
-        points_arr = []
-        # Using 'with handles closing the file, even if an error occurs
-        with open(file_name, 'r') as file:
-            for line in file:
-                line = line.strip()
-                
-                # If the line is empty, skip to the next iteration
-                if not line:
-                    continue
-                
-                # Split the line and convert directly to floats using a list comprehension
-                temp = line.split(",")
-                points_arr.append([float(val) for val in temp])
-                
-        return points_arr
-
-    # Catching an Exception if one were to occur
-    except Exception:
-        print("An Error Has Occurred")
-        sys.exit(1)
-
-
 def main():
     np.random.seed(1234)
     if len(sys.argv) != 3:
@@ -138,14 +103,14 @@ def main():
     points_list = parse_points(file_name)
     n = len(points_list)
     d = len(points_list[0])
-    max_iter = 300 #not sure if needed
-    epsilon = 1e-4 #not sure if needed
+    max_iter = 300 #added for modularity
+    epsilon = 1e-4 #added for modularity
 
     kmeans_clusters = cluster_handle(k, max_iter, points_list)
 
-    W = symnmf.norm(points_list, n ,d)
-    H = init_H(W, k)
-    H = symnmf.symnmf(H, W, n, k, epsilon, max_iter)
+    W = symnmfmodule.norm(points_list, n ,d)
+    H = symnmf.init_H(W, k)
+    H = symnmfmodule.symnmf(H, W, n, k, epsilon, max_iter)
 
     symnmf_clusters = get_cluster_list_symnmf(H, points_list)
     kmeans_clusters = get_cluster_list_kmeans(kmeans_clusters, points_list)

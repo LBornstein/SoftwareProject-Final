@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-import symnmf
+import symnmfmodule as symnmf
 
 def main():
     np.random.seed(1234)
@@ -33,7 +33,7 @@ def main():
 
     elif goal == 'norm':
         M = symnmf.norm(points_list, n, d)
-        
+
     else:
         print("An Error Has Occurred")
         sys.exit(1)
