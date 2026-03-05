@@ -2,43 +2,56 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "symnmf.h"
+
 #define BETA 0.5
+/*Helper Function Prototype Declarations --------------------------------------------------*/
+double **allocate_matrix(int rows, int cols);
+void free_matrix(double **matrix);
+void print_matrix(double **matrix, int rows, int cols);
+double **mat_transpose(double **mat, int rows, int cols);
+double calculate_distance(double* p, double* q, int d);
+double **matrix_mult(double **LeftMat, double **RightMat, int rows_left, int inner_dim, int cols_right);
+double **matrix_subtract(double **LeftMat, double **RightMat, int rows, int cols);
+double calculate_Frobenius_norm(double **matrix, int rows, int cols);
 
 /*helper functions------------------------------------------------------------------*/
 
 int *get_matrix_size(char *file_name){
-    /*Reads input file in order to determine the matrix size*/
-    FILE *file_ptr = fopen(file_name,"r");
-    int first_line, character, last_char, *mat_shape = calloc(2,sizeof(int));
+    /* Reads input file in order to determine the matrix size */
+    FILE *file_ptr = fopen(file_name, "r");
+    int character, last_char = '\n'; 
+    int *mat_shape = calloc(2, sizeof(int));
 
-    if (file_ptr == NULL || mat_shape == NULL){ 
-        /*Check for mem errors*/
+    if (file_ptr == NULL || mat_shape == NULL) { 
+        /* Check for mem errors */
         printf("An Error Has Occurred\n");
         if (file_ptr != NULL) fclose(file_ptr);
         if (mat_shape != NULL) free(mat_shape);
-        
         exit(1);
     }
-    first_line = 1;
-    last_char = '\n'; /*helper value to handle last line ending*/
 
-    while((character = fgetc(file_ptr)) != EOF){
-         if (first_line == 1){
-            if(character == ',') mat_shape[1]++;
-            if (character == '\n'){
-                mat_shape[0]++;
-                mat_shape[1]++;
-                first_line = 0;
-                last_char = character;
-                continue;
-            } 
+    while ((character = fgetc(file_ptr)) != EOF) {
+        /* Count columns only in the first row by counting commas */
+        if (mat_shape[0] == 0 && character == ',') {
+            mat_shape[1]++;
         }
+        /* Count row only if we hit a newline and the prev char was not a newline */
         if (character == '\n' && last_char != '\n') {
             mat_shape[0]++;
         }
         last_char = character;
     }
-    if (last_char != '\n' && mat_shape[1] > 0) mat_shape[0]++;
+
+    /* Edge case: File contains data but does not end with a newline */
+    if (last_char != '\n' && last_char != EOF) {
+        mat_shape[0]++;
+    }
+
+    /* The number of columns is exactly the number of commas + 1 */
+    if (mat_shape[0] > 0) {
+        mat_shape[1]++;
+    }
 
     fclose(file_ptr);
     return mat_shape;
@@ -110,6 +123,7 @@ double **mat_transpose(double **mat, int rows, int cols){
 
 
 double **update_H(double **H, double **W, int n, int k){
+    /*function to update H using the provided formula*/
     double **ret_mat, **WH, **transH, **HTH, **HHTH;
     int i, j;
     ret_mat = allocate_matrix(n,k);
@@ -174,7 +188,7 @@ double calculate_distance(double* p, double* q, int d) {
     for (i = 0; i < d; i++) {
         sum += (p[i] - q[i]) * (p[i] - q[i]);
     }
-    return sqrt(sum);
+    return sqrt(sum); /*kept this as sqrt even though we square it, in order to be more modular (more future functions might want to use Euclidian Distance)*/
 }
 
 double** calculate_similarity_matrix(double** p, int n, int d){
@@ -260,16 +274,17 @@ double** calculate_Laplacian(double** D, double** A, int n){
 }
 
 double calculate_Frobenius_norm(double **matrix, int rows, int cols){
+    /*calculates the F_norm, returns the raw squared values instead of the sqrt since we square it up again later*/
     int i,j;
     double retval = 0;
 
     for(i = 0; i < rows ; i++){
         for(j = 0; j < cols ; j++){
-            retval += pow(matrix[i][j], 2);
+            retval += matrix[i][j] * matrix[i][j];
         }
     }
 
-    return sqrt(retval);
+    return retval;
 }
 
 
@@ -284,7 +299,7 @@ double** symnmf(double** H, double** W, int n , int k, double eps, int max_iter)
     for(i = 0 ; i < max_iter ; i++){
         new_H = update_H(H,W,n,k);
         temp = matrix_subtract(new_H,H,n,k);
-        if(pow(calculate_Frobenius_norm(temp,n,k),2) < eps) convergence = 1;
+        if(calculate_Frobenius_norm(temp,n,k) < eps) convergence = 1;
         free_matrix(temp);
         free_matrix(H);
         H = new_H;
