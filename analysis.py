@@ -100,7 +100,7 @@ def main():
     k = int(sys.argv[1])
     file_name = sys.argv[2]
 
-    points_list = parse_points(file_name)
+    points_list = symnmf.parse_points(file_name)
     n = len(points_list)
     d = len(points_list[0])
     max_iter = 300 #added for modularity
