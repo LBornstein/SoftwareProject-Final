@@ -137,10 +137,14 @@ double **update_H(double **H, double **W, int n, int k){
 
     for(i = 0; i < n ; i++){
         for (j = 0 ; j < k ; j++){
-            ret_mat[i][j] = H[i][j]*(1-BETA + BETA*(WH[i][j]/HHTH[i][j]));
+            if (HHTH[i][j] == 0.0) {
+                ret_mat[i][j] = H[i][j];  /* safe fallback — keep previous value */
+            } 
+            else {
+                ret_mat[i][j] = H[i][j]*(1-BETA + BETA*(WH[i][j]/HHTH[i][j]));
+            }
         }
     }
-
     free_matrix(WH);
     free_matrix(HHTH);
 
