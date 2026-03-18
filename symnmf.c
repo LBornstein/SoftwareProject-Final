@@ -369,6 +369,7 @@ int main(int argc, char *argv[]) {
     }
     else {
         printf("An Error Has Occurred\n");
+        free_matrix(points_mat);   /* release before exit */
         return 1;
     }
 
