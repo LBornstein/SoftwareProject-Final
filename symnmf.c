@@ -265,11 +265,16 @@ void calculate_D_pow(double** D, int n){
 }
 
 double** calculate_Laplacian(double** D, double** A, int n){
-    double **DA, **W;
-    calculate_D_pow(D, n);
-    DA = matrix_mult(D, A, n , n, n);
-    W = matrix_mult(DA, D, n, n, n);
-    free_matrix(DA);
+    /* calculates the laplacian matrix*/
+    double **W = allocate_matrix(n,n);
+    int i,j;
+    calculate_D_pow(D,n);
+    for (i = 0; i < n ; i++){
+        for (j = 0 ; j < n ; j++){
+            W[i][j] = D[i][i]*A[i][j]*D[j][j]; 
+            /*since D is diagonal, multiplying by it from the right or left scales the rows\cols*/
+        }
+    }
     return W;
 }
 
