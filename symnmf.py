@@ -5,9 +5,7 @@ import symnmfmodule as symnmf
 def main():
     np.random.seed(1234)
 
-    if len(sys.argv) != 4:
-        print("An Error Has Occurred")
-        sys.exit(1)
+    if len(sys.argv) != 4: print_and_exit()
     
     k = int(sys.argv[1])
     goal = sys.argv[2]
@@ -15,8 +13,8 @@ def main():
     points_list = parse_points(file_name)
 
     n = len(points_list)
+    if (k > n): print_and_exit()
     d = len(points_list[0])
-
     max_iter = 300
     epsilon = 1e-4
 
@@ -25,21 +23,20 @@ def main():
         H = init_H(W, k)
         M = symnmf.symnmf(H, W, n, k, epsilon, max_iter)
 
-    elif goal == 'sym':
-        M = symnmf.sym(points_list, n, d)
+    elif goal == 'sym': M = symnmf.sym(points_list, n, d)
 
-    elif goal == 'ddg':
-        M = symnmf.ddg(points_list, n, d)
+    elif goal == 'ddg': M = symnmf.ddg(points_list, n, d)
 
-    elif goal == 'norm':
-        M = symnmf.norm(points_list, n, d)
+    elif goal == 'norm': M = symnmf.norm(points_list, n, d)
 
-    else:
-        print("An Error Has Occurred")
-        sys.exit(1)
+    else: print_and_exit()
     
     print_mat(M)
     exit(0)
+
+def print_and_exit():
+    print("An Error Has Occurred")
+    sys.exit(1)
 
 def calculate_matrix_avg(M):
     sum = 0
@@ -86,4 +83,4 @@ def print_mat(m):
 
 
 if (__name__=="__main__"):
-    main()
+    main()     
