@@ -13,7 +13,7 @@ def main():
     points_list = parse_points(file_name)
 
     n = len(points_list)
-    if (k > n): print_and_exit()
+    if (k >= n): print_and_exit()
     d = len(points_list[0])
     max_iter = 300
     epsilon = 1e-4
