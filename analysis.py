@@ -1,18 +1,22 @@
+"""Compare k-means and SymNMF clustering results on the same input data."""
+
 import sys
 import symnmfmodule
 import symnmf
 import numpy as np
 from sklearn.metrics import silhouette_score
 
-#things for kmeans algorithem ----------------------------------------------------------
+#things for kmeans algorithm ----------------------------------------------------------
 
 def calculate_distance(p,q): #p and q are arrays representing points
+    """Return the Euclidean distance between two points."""
     sum_of_deltas = 0
     for i in range(len(p)):
         sum_of_deltas += (p[i] - q[i]) ** 2
     return sum_of_deltas**0.5
 
 def update_centroid(cluster):
+    """Calculate the average point for a non-empty cluster."""
     dim = len(cluster[0])
     num_of_points = len(cluster)
     updated_centroid = [0 for i in range(dim)]
@@ -25,7 +29,8 @@ def update_centroid(cluster):
 
     return updated_centroid
 
-def find_closest_cluster(centroids, point): #recieves centroids and a point and returns the index of the closest centroid
+def find_closest_cluster(centroids, point): 
+    """Return the index of the nearest centroid for a point."""
     close_cluster_index=0
     distance=calculate_distance(centroids[0],point)
     for i in range(1,len(centroids)):
@@ -36,6 +41,7 @@ def find_closest_cluster(centroids, point): #recieves centroids and a point and 
     return close_cluster_index
 
 def cluster_handle(k , iter , points_arr):
+    """Run k-means clustering and return the final clusters."""
 
     centroids = [0 for i in range(k)]
     clusters = [[] for i in range(k)]
@@ -67,6 +73,7 @@ def cluster_handle(k , iter , points_arr):
     return clusters
 
 def get_cluster_list_kmeans(clusters, points_list):
+    """Map each input point to its k-means cluster index."""
     clusters_list = [0 for i in range(len(points_list))]
     for i in range(len(points_list)):
         for j in range(len(clusters)):
@@ -78,6 +85,7 @@ def get_cluster_list_kmeans(clusters, points_list):
 #things for the symnmf alogrithem---------------------------------------
 
 def get_cluster_list_symnmf(H, points_list):
+    """Map each row of H to the cluster with the largest score."""
     clusters_list = [0 for i in range(len(points_list))]
     for i in range (len(H)):
         max_score = 0
@@ -92,6 +100,7 @@ def get_cluster_list_symnmf(H, points_list):
 # general code
 
 def main():
+    """Parse command-line arguments, run clustering, and print silhouette scores."""
     np.random.seed(1234)
     if len(sys.argv) != 3:
         print("An Error Has Occurred")

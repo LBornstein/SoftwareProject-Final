@@ -1,8 +1,11 @@
+"""Run the SymNMF command-line interface and print the requested matrix."""
+
 import numpy as np
 import sys
 import symnmfmodule as symnmf
 
 def main():
+    """Read the command-line arguments, run the requested task, and print the result."""
     np.random.seed(1234)
 
     if len(sys.argv) != 4: print_and_exit()
@@ -35,10 +38,12 @@ def main():
     exit(0)
 
 def print_and_exit():
+    """Print the standard error message and exit with a failure code."""
     print("An Error Has Occurred")
     sys.exit(1)
 
 def calculate_matrix_avg(M):
+    """Calculate the average value of all entries in a square matrix."""
     sum = 0
     for i in range(len(M)):
         for j in range(len(M[0])):
@@ -46,6 +51,7 @@ def calculate_matrix_avg(M):
     return sum / (len(M)**2)
     
 def init_H(W, k):
+    """Build a random starting matrix for SymNMF based on the normalized graph."""
     n = len(W)
     m = calculate_matrix_avg(W)
     interval = 2 * ((m / k) ** 0.5)
@@ -53,6 +59,7 @@ def init_H(W, k):
     return H
 
 def parse_points(file_name):
+    """Load comma-separated points from a text file into a list of floats."""
     try:
         points_arr = []
         # Using 'with handles closing the file, even if an error occurs
@@ -76,6 +83,7 @@ def parse_points(file_name):
         sys.exit(1)
 
 def print_mat(m):
+    """Print a matrix with four decimal places and comma-separated rows."""
     for row in m:
         # Formats every float to 4 decimal places, joins them with commas
         print(",".join([f"{val:.4f}" for val in row]))
