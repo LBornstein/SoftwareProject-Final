@@ -110,6 +110,7 @@ void print_matrix(double **matrix, int rows, int cols) {
 }
 
 double **mat_transpose(double **mat, int rows, int cols){
+    /* Does a transpose operation on a matrix and returns a pointer to the transposed matrix*/
     double **ret_mat = allocate_matrix(cols, rows);
     int i, j;
 
@@ -187,6 +188,7 @@ double **parse_points(char *file_name, int num_of_points, int dim){
 
 /*calculation part------------------------------------------------------------------*/
 double calculate_distance(double* p, double* q, int d) {
+    /*Calculates euclidian distance */
     double sum = 0.0;
     int i;
     for (i = 0; i < d; i++) {
