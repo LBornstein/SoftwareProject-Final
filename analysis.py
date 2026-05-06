@@ -117,9 +117,9 @@ def main():
 
     kmeans_clusters = cluster_handle(k, max_iter, points_list)
 
-    W = symnmfmodule.norm(points_list, n ,d)
+    W = symnmfmodule.norm(points_list)
     H = symnmf.init_H(W, k)
-    H = symnmfmodule.symnmf(H, W, n, k, epsilon, max_iter)
+    H = symnmfmodule.symnmf(H, W, epsilon, max_iter)
 
     symnmf_clusters = get_cluster_list_symnmf(H, points_list)
     kmeans_clusters = get_cluster_list_kmeans(kmeans_clusters, points_list)
