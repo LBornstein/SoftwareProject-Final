@@ -20,6 +20,36 @@ static double **PyList_to_DoublePtrPtr(PyObject *list, int rows, int cols) {
 }
 
 
+static int get_2d_list_shape(PyObject *list, int *rows, int *cols) {
+    PyObject *first_row;
+
+    if (!PyList_Check(list)) {
+        PyErr_SetString(PyExc_Exception, "An Error Has Occurred");
+        return 0;
+    }
+
+    *rows = (int)PyList_Size(list);
+    if (*rows <= 0) {
+        PyErr_SetString(PyExc_Exception, "An Error Has Occurred");
+        return 0;
+    }
+
+    first_row = PyList_GetItem(list, 0);
+    if (!PyList_Check(first_row)) {
+        PyErr_SetString(PyExc_Exception, "An Error Has Occurred");
+        return 0;
+    }
+
+    *cols = (int)PyList_Size(first_row);
+    if (*cols <= 0) {
+        PyErr_SetString(PyExc_Exception, "An Error Has Occurred");
+        return 0;
+    }
+
+    return 1;
+}
+
+
 static PyObject *DoublePtrPtr_to_PyList(double **mat, int rows, int cols) {
     /* Converts C double** to python list of lists */
     int i, j;
@@ -43,7 +73,10 @@ static PyObject* wrap_sym(PyObject *self, PyObject *args) {
     int n, d;
     double **c_data_points, **c_result;
 
-    if (!PyArg_ParseTuple(args, "Oii", &data_points, &n, &d)) {
+    if (!PyArg_ParseTuple(args, "O", &data_points)) {
+        return NULL;
+    }
+    if (!get_2d_list_shape(data_points, &n, &d)) {
         return NULL;
     }
     
@@ -63,7 +96,10 @@ static PyObject* wrap_ddg(PyObject *self, PyObject *args) {
     int n, d;
     double **c_data_points, **c_result;
 
-    if (!PyArg_ParseTuple(args, "Oii", &data_points, &n, &d)) {
+    if (!PyArg_ParseTuple(args, "O", &data_points)) {
+        return NULL;
+    }
+    if (!get_2d_list_shape(data_points, &n, &d)) {
         return NULL;
     }
     
@@ -82,7 +118,10 @@ static PyObject* wrap_norm(PyObject *self, PyObject *args) {
     int n, d;
     double **c_data_points, **c_result;
 
-    if (!PyArg_ParseTuple(args, "Oii", &data_points, &n, &d)) {
+    if (!PyArg_ParseTuple(args, "O", &data_points)) {
+        return NULL;
+    }
+    if (!get_2d_list_shape(data_points, &n, &d)) {
         return NULL;
     }
     
@@ -99,11 +138,25 @@ static PyObject* wrap_norm(PyObject *self, PyObject *args) {
 static PyObject* wrap_symnmf(PyObject *self, PyObject *args) {
     /* Wrapper for symnmf() */
     PyObject *H_py, *W_py, *py_result;
-    int n, k, max_iter;
+    int n, k, max_iter, args_count;
     double eps;
     double **H_c, **W_c, **result_c;
 
-    if (!PyArg_ParseTuple(args, "OOiidi", &H_py, &W_py, &n, &k, &eps, &max_iter)) {
+    args_count = (int)PyTuple_Size(args);
+
+    if (args_count == 4) {
+        if (!PyArg_ParseTuple(args, "OOdi", &H_py, &W_py, &eps, &max_iter)) {
+            return NULL;
+        }
+        if (!get_2d_list_shape(H_py, &n, &k)) {
+            return NULL;
+        }
+    } else if (args_count == 6) {
+        if (!PyArg_ParseTuple(args, "OOiidi", &H_py, &W_py, &n, &k, &eps, &max_iter)) {
+            return NULL;
+        }
+    } else {
+        PyErr_SetString(PyExc_Exception, "An Error Has Occurred");
         return NULL;
     }
     

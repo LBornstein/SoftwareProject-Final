@@ -22,15 +22,15 @@ def main():
     epsilon = 1e-4
 
     if goal == 'symnmf':
-        W = symnmf.norm(points_list, n ,d)
+        W = symnmf.norm(points_list)
         H = init_H(W, k)
-        M = symnmf.symnmf(H, W, n, k, epsilon, max_iter)
+        M = symnmf.symnmf(H, W, epsilon, max_iter)
 
-    elif goal == 'sym': M = symnmf.sym(points_list, n, d)
+    elif goal == 'sym': M = symnmf.sym(points_list)
 
-    elif goal == 'ddg': M = symnmf.ddg(points_list, n, d)
+    elif goal == 'ddg': M = symnmf.ddg(points_list)
 
-    elif goal == 'norm': M = symnmf.norm(points_list, n, d)
+    elif goal == 'norm': M = symnmf.norm(points_list)
 
     else: print_and_exit()
     

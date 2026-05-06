@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors
-LDFLAGS = -lm
+LDFLAGS = -lm -no-pie
 
 symnmf: symnmf.o
 	$(CC) $(CFLAGS) -o symnmf symnmf.o $(LDFLAGS)
