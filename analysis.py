@@ -106,10 +106,19 @@ def main():
         print("An Error Has Occurred")
         sys.exit(1)
     
-    k = int(sys.argv[1])
+    try:
+        k = int(sys.argv[1])
+    except Exception:
+        print("An Error Has Occurred")
+        sys.exit(1)
+
     file_name = sys.argv[2]
 
     points_list = symnmf.parse_points(file_name)
+    if not points_list:
+        print("An Error Has Occurred")
+        sys.exit(1)
+
     n = len(points_list)
     d = len(points_list[0])
     max_iter = 300 #added for modularity

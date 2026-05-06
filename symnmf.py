@@ -9,11 +9,18 @@ def main():
     np.random.seed(1234)
 
     if len(sys.argv) != 4: print_and_exit()
-    
-    k = int(sys.argv[1])
+
+    try:
+        k = int(sys.argv[1])
+    except Exception:
+        print_and_exit()
+
     goal = sys.argv[2]
     file_name = sys.argv[3]
     points_list = parse_points(file_name)
+
+    if not points_list:
+        print_and_exit()
 
     n = len(points_list)
     if (k >= n): print_and_exit()
