@@ -21,6 +21,7 @@ static double **PyList_to_DoublePtrPtr(PyObject *list, int rows, int cols) {
 
 
 static int get_2d_list_shape(PyObject *list, int *rows, int *cols) {
+	/* gets the shape of the list from python, since we are not allowed to pass the dimensions */
     PyObject *first_row;
 
     if (!PyList_Check(list)) {
